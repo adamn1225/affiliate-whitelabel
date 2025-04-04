@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/adamn1225/affiliate-tracking/models"
+	"github.com/adamn1225/affiliate-whitelabel/models"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )

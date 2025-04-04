@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/datatypes"
 	"gorm.io/gorm"
 )
 
@@ -12,21 +13,10 @@ var db *gorm.DB
 
 // POST /api/leads
 type Lead struct {
-	ID           uint   `gorm:"primaryKey"`
-	Name         string
-	Email        string
-	Phone        string
-	Year         string
-	Manufacturer string
-	Model        string
-	Message      string
-	Origin       string `json:"origin"`
-	Destination  string `json:"destination"`
-	UtmSource    string `json:"utm_source"`
-	UtmMedium    string `json:"utm_medium"`
-	UtmCampaign  string `json:"utm_campaign"`
-	AffiliateID  string `gorm:"index"`
-	CreatedAt    int64  `gorm:"autoCreateTime"`
+	ID          uint           `gorm:"primaryKey"`
+	AffiliateID string         `gorm:"index"`
+	Data        datatypes.JSON `gorm:"type:jsonb"`
+	CreatedAt   int64          `gorm:"autoCreateTime"`
 }
 
 func CreateLead(c *gin.Context) {

@@ -3,7 +3,7 @@ package controllers
 import (
 	"net/http"
 
-	"github.com/adamn1225/affiliate-tracking/models"
+	"github.com/adamn1225/affiliate-whitelabel/models"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )

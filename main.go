@@ -5,8 +5,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/adamn1225/affiliate-tracking/config"
-	"github.com/adamn1225/affiliate-tracking/routes"
+	"github.com/adamn1225/affiliate-whitelabel/config"
+	"github.com/adamn1225/affiliate-whitelabel/routes"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"

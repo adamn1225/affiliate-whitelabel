@@ -7,8 +7,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 
-	"github.com/adamn1225/affiliate-tracking/config"
-	"github.com/adamn1225/affiliate-tracking/routes"
+	"github.com/adamn1225/affiliate-whitelabel/config"
+	"github.com/adamn1225/affiliate-whitelabel/routes"
 )
 
 func main() {

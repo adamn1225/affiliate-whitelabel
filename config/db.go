@@ -6,7 +6,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/adamn1225/affiliate-tracking/models"
+	"github.com/adamn1225/affiliate-whitelabel/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -52,7 +52,7 @@ func CloseDB(db *gorm.DB) {
 }
 
 func MigrateDB(db *gorm.DB) {
-	err := db.AutoMigrate(&models.Lead{}, &models.Affiliate{})
+	err := db.AutoMigrate(&models.Lead{}, &models.Affiliate{}, &models.FormConfig{})
 	if err != nil {
 		log.Fatal("Migration failed:", err)
 	}
