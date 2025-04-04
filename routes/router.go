@@ -23,6 +23,7 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB) {
 	router.GET("/api/leads", middlewares.RequireAdmin(), controllers.GetAllLeads)
 	router.GET("/api/affiliates", middlewares.RequireAdmin(), controllers.GetAllAffiliates)
 	router.POST("/api/admin/login", controllers.AdminLogin)
-	router.GET("/api/form-config/:id", controllers.GetFormConfig)
-	router.POST("/api/form-config", controllers.CreateOrUpdateFormConfig)
+	router.POST("/api/formconfig", controllers.CreateOrUpdateFormConfig)
+	router.GET("/api/formconfig/:affiliateId", controllers.GetFormConfig)
+
 }

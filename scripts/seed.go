@@ -6,6 +6,8 @@ import (
 	"os"
 	"time"
 
+	"gorm.io/datatypes"
+
 	"github.com/adamn1225/affiliate-whitelabel/models"
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
@@ -55,6 +57,22 @@ func main() {
 		},
 	}
 
+	previewConfig := models.FormConfig{
+	AffiliateID: "preview-mode",
+	FormTitle:   "Preview a Demo Form",
+	ButtonText:  "Send Inquiry",
+	ButtonColor: "#ff5733",
+	Fields: datatypes.JSON(`[
+		{"label": "Full Name", "name": "name", "placeholder": "John Doe", "type": "text", "required": true},
+		{"label": "Email Address", "name": "email", "placeholder": "you@example.com", "type": "email", "required": true},
+		{"label": "Phone Number", "name": "phone", "placeholder": "(123) 456-7890", "type": "text", "required": false}
+	]`),
+}
+
+db.Clauses(clause.OnConflict{DoNothing: true}).Create(&previewConfig)
+
+	
+
 	for _, affiliate := range affiliates {
 		db.Clauses(clause.OnConflict{DoNothing: true}).Create(&affiliate)
 	}
@@ -82,6 +100,5 @@ func main() {
 
 		db.Clauses(clause.OnConflict{DoNothing: true}).Create(&formConfig)
 	}
-
 
 }

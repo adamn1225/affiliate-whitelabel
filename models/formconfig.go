@@ -13,10 +13,10 @@ type FormField struct {
 }
 
 type FormConfig struct {
-	ID           uint           `gorm:"primaryKey"`
-	AffiliateID  string         `gorm:"uniqueIndex"`
-	Fields       datatypes.JSON // JSON array of FormField
-	FormTitle    string
-	ButtonText   string
-	ButtonColor  string
+	ID          uint           `gorm:"primaryKey"`
+	AffiliateID string         `gorm:"uniqueIndex" json:"affiliate_id"`
+	Fields      datatypes.JSON `json:"fields"`
+	FormTitle   string         `json:"form_title"`
+	ButtonText  string         `json:"button_text"`
+	ButtonColor string         `json:"button_color"`
 }
