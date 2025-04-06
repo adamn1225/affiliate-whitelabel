@@ -33,6 +33,9 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB) {
 	r.GET("/api/formconfig/:affiliateId", controllers.GetFormConfig) // legacy for now
 	r.POST("/api/formconfig", middlewares.RequireRole("vendor"), handlers.CreateForm(db))
 
+	r.GET("/api/vendor/formconfigs", middlewares.RequireRole("vendor"), handlers.GetVendorFormConfigs(db))
+	
+
 	// Affiliate
 	r.GET("/api/affiliate-form/:slug", handlers.GetAffiliateForm(db))
 	r.GET("/api/affiliate/payouts", handlers.GetAffiliatePayouts(db))

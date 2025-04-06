@@ -20,11 +20,13 @@ const (
 
 func RequireAdmin() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		tokenString := strings.TrimPrefix(c.GetHeader("Authorization"), "Bearer ")
-		if tokenString == "" {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Missing token"})
-			return
+	authHeader := c.GetHeader("Authorization")
+	if !strings.HasPrefix(authHeader, "Bearer ") {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Missing or malformed token"})
+		return
 		}
+
+		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
 
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (any, error) {
 			return jwtSecret, nil
@@ -45,15 +47,24 @@ func RequireAdmin() gin.HandlerFunc {
 	}
 }
 
-func RequireRole(role string) gin.HandlerFunc {
+func RequireRole(expectedRole string) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		tokenString := strings.TrimPrefix(c.GetHeader("Authorization"), "Bearer ")
+		authHeader := c.GetHeader("Authorization")
+		var tokenString string
+
+		// Check Authorization header or fall back to cookie
+		if strings.HasPrefix(authHeader, "Bearer ") {
+			tokenString = strings.TrimPrefix(authHeader, "Bearer ")
+		} else if cookieToken, err := c.Cookie("token"); err == nil {
+			tokenString = cookieToken
+		}
+
 		if tokenString == "" {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Missing token"})
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Missing or malformed token"})
 			return
 		}
 
-		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (any, error) {
+		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 			return jwtSecret, nil
 		})
 
@@ -63,19 +74,25 @@ func RequireRole(role string) gin.HandlerFunc {
 		}
 
 		claims, ok := token.Claims.(jwt.MapClaims)
-		if !ok || claims["role"] != role {
+		if !ok {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token structure"})
+			return
+		}
+
+		roleClaim := claims["role"]
+		if roleClaim != expectedRole {
 			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "Access denied"})
 			return
 		}
 
-		// You could attach user data to context here:
 		c.Set("user_id", claims["user_id"])
-		c.Set("role", claims["role"])
+		c.Set("role", roleClaim)
 		c.Next()
 	}
 }
 
-func GenerateToken(userID interface{}, role string) (string, error) {
+
+func GenerateToken(userID any, role string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"user_id": userID,
 		"role":    role,
@@ -92,9 +109,18 @@ func GenerateToken(userID interface{}, role string) (string, error) {
 
 func RequireAuth() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		tokenString := strings.TrimPrefix(c.GetHeader("Authorization"), "Bearer ")
+		authHeader := c.GetHeader("Authorization")
+		var tokenString string
+
+		// Check Authorization header or fall back to cookie
+		if strings.HasPrefix(authHeader, "Bearer ") {
+			tokenString = strings.TrimPrefix(authHeader, "Bearer ")
+		} else if cookieToken, err := c.Cookie("token"); err == nil {
+			tokenString = cookieToken
+		}
+
 		if tokenString == "" {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Missing token"})
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Missing or malformed token"})
 			return
 		}
 
@@ -118,3 +144,6 @@ func RequireAuth() gin.HandlerFunc {
 		c.Next()
 	}
 }
+
+
+

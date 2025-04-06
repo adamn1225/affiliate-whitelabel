@@ -36,6 +36,11 @@ func main() {
 		AllowCredentials: true,
 	}))
 
+	router.Use(func(c *gin.Context) {
+	log.Printf("[CORS DEBUG] Method: %s, Path: %s, Origin: %s", c.Request.Method, c.Request.URL.Path, c.GetHeader("Origin"))
+	c.Next()
+})
+
 	routes.SetupRoutes(router, db)
 
 	// Add other routes here (POST /api/leads, etc.)

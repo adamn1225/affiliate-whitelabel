@@ -35,7 +35,7 @@ func CreateLead(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"status": "success"})
 }
 
-func ToJSON(data interface{}) datatypes.JSON {
+func ToJSON(data any) datatypes.JSON {
 	bytes, _ := json.Marshal(data)
 	return datatypes.JSON(bytes)
 }

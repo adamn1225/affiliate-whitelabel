@@ -27,7 +27,7 @@ services:
       - DB_NAME=affiliate_leads
       - DB_PORT=5432
       - DB_SSLMODE=disable
-      - JWT_SECRET=4Bsv7VW3k9Eq1eQIp+4kiMW/MoaPU6Q292w/x7GysqY=
+      - JWT_SECRET=Wa8wDrAuSHy31FvN7MgZQUUe8tTt5yqmsUraBa7E0XA=
     ports:
       - "8080:8080"
     networks:

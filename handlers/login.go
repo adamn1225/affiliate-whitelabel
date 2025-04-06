@@ -47,7 +47,8 @@ func Login(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		c.SetCookie("token", token, 86400, "/", "localhost", false, false)
+		c.SetCookie("token", token, 86400, "/", "", false, false)
+
 
 		c.JSON(http.StatusOK, gin.H{
 			"token": token,

@@ -15,9 +15,8 @@ import (
 )
 
 func main() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
+	if err := godotenv.Load(); err != nil {
+		log.Println("No .env file loaded (ok in prod)")
 	}
 
 	dsn := "host=" + os.Getenv("DB_HOST") +
@@ -33,7 +32,7 @@ func main() {
 	}
 
 	// Seed vendors (users)
-	vendors := []models.User{
+	vendors := []*models.User{
 		{
 			Email:        "vendor1@example.com",
 			PasswordHash: hashPassword("password123"),
@@ -53,12 +52,15 @@ func main() {
 			CreatedAt:    time.Now(),
 		},
 	}
+
 	for _, v := range vendors {
-		db.Create(&v)
+		if err := db.Create(v).Error; err != nil {
+			log.Fatal("Error creating vendor:", err)
+		}
 	}
 
 	// Seed affiliates
-	affiliates := []models.Affiliate{
+	affiliates := []*models.Affiliate{
 		{
 			ID:             uuid.New().String(),
 			Email:          "affiliate1@example.com",
@@ -84,8 +86,11 @@ func main() {
 			CreatedAt:      time.Now(),
 		},
 	}
+
 	for _, a := range affiliates {
-		db.Create(&a)
+		if err := db.Create(a).Error; err != nil {
+			log.Fatal("Error creating affiliate:", err)
+		}
 	}
 
 	// Default form fields
@@ -104,9 +109,11 @@ func main() {
 		ButtonText:  "Submit",
 		ButtonColor: "#ff6600",
 	}
-	db.Create(&form)
+	if err := db.Create(&form).Error; err != nil {
+		log.Fatal("Error creating form config:", err)
+	}
 
-	// Create affiliate links for each affiliate
+	// Create affiliate links and leads
 	for _, affiliate := range affiliates {
 		link := models.AffiliateLink{
 			Slug:         uuid.New().String()[0:6],
@@ -115,9 +122,10 @@ func main() {
 			PayoutAmount: 25.00,
 			CreatedAt:    time.Now(),
 		}
-		db.Create(&link)
+		if err := db.Create(&link).Error; err != nil {
+			log.Fatal("Error creating affiliate link:", err)
+		}
 
-		// Create 2 fake leads per affiliate
 		for i := 1; i <= 2; i++ {
 			leadData := map[string]interface{}{
 				"name":  affiliate.ContactName + " Lead " + string(rune(i)),
@@ -125,6 +133,7 @@ func main() {
 				"phone": "123-456-7890",
 			}
 			dataJSON, _ := json.Marshal(leadData)
+
 			lead := models.Lead{
 				AffiliateID: affiliate.ID,
 				FormID:      form.ID,
@@ -134,9 +143,10 @@ func main() {
 				IsPaid:      false,
 				CreatedAt:   time.Now(),
 			}
-			db.Create(&lead)
+			if err := db.Create(&lead).Error; err != nil {
+				log.Fatal("Error creating lead:", err)
+			}
 
-			// Add a payout record
 			payout := models.AffiliatePayout{
 				AffiliateID: affiliate.ID,
 				LeadID:      lead.ID,
@@ -144,11 +154,13 @@ func main() {
 				Status:      "pending",
 				CreatedAt:   time.Now(),
 			}
-			db.Create(&payout)
+			if err := db.Create(&payout).Error; err != nil {
+				log.Fatal("Error creating payout:", err)
+			}
 		}
 	}
 
-	log.Println(" Seeding complete.")
+	log.Println("✅ Seeding complete.")
 }
 
 func hashPassword(pw string) string {
