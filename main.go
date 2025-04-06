@@ -13,25 +13,28 @@ import (
 )
 
 func main() {
-	db, err := config.ConnectDB()
-	if err != nil {
-		log.Fatal("Failed to connect to DB: ", err)
-		}
-	defer config.CloseDB(db)
-		config.MigrateDB(db) 
-
-	// Load environment variables from .env file
 	if err := godotenv.Load(); err != nil {
 		log.Println("No .env file loaded (ok in prod)")
 	}
+	db, err := config.ConnectDB()
+
+	if err != nil {
+		log.Fatal("Failed to connect to DB: ", err)
+	}
+	defer config.CloseDB(db)
+	config.MigrateDB(db)
+
+	// Load environment variables from .env file
 
 	router := gin.Default()
 
 	router.Use(cors.New(cors.Config{
-	AllowOrigins:     []string{"*"}, // DEV ONLY — don't push to prod like this
-	AllowMethods:     []string{"GET", "POST", "OPTIONS"},
-	AllowHeaders:     []string{"Origin", "Content-Type"},
-}))
+		AllowOrigins:     []string{"http://localhost:3000"}, // or "*" in dev
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+	}))
 
 	routes.SetupRoutes(router, db)
 

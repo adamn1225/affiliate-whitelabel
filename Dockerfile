@@ -6,19 +6,15 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . .
-
-# 👇 Critical: static binary
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main ./main.go
 
-# Stage 2 - minimal final image
-FROM scratch
+# Stage 2 - minimal final image using Alpine
+FROM alpine:latest
 
-# Add CA certs (needed for HTTPS)
-COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+RUN apk --no-cache add ca-certificates
 
-# Add app binary
+WORKDIR /root/
 COPY --from=builder /app/main .
 
 EXPOSE 8080
-
 CMD ["./main"]

@@ -19,4 +19,5 @@ type FormConfig struct {
 	FormTitle   string         `json:"form_title"`
 	ButtonText  string         `json:"button_text"`
 	ButtonColor string         `json:"button_color"`
+	UserID      uint           `json:"user_id"`
 }

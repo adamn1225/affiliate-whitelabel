@@ -17,7 +17,7 @@ func CreateLead(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-    lead.CreatedAt = time.Now().Unix()
+	lead.CreatedAt = time.Now()
 	if err := DB.Create(&lead).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -26,14 +26,13 @@ func CreateLead(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"status": "created", "lead": lead})
 }
 
-
 func GetAllLeads(c *gin.Context) {
-    var leads []models.Lead
+	var leads []models.Lead
 
-    if err := DB.Find(&leads).Error; err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch leads"})
-        return
-    }
+	if err := DB.Find(&leads).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch leads"})
+		return
+	}
 
-    c.JSON(http.StatusOK, leads)
+	c.JSON(http.StatusOK, leads)
 }
