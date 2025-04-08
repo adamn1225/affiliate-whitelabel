@@ -27,13 +27,13 @@ func GetFormConfig(c *gin.Context) {
 			return
 		}
 
-		defaultConfig := models.FormConfig{
-			AffiliateID:  affiliateID,
-			Fields:       datatypes.JSON(fieldsJSON),
-			FormTitle:    "Request a Transport Quote",
-			ButtonText:   "Submit Request",
-			ButtonColor:  "#000000",
-		}
+defaultConfig := models.FormConfig{
+    AffiliateID:  &affiliateID, // Use & to convert string to *string
+    Fields:       datatypes.JSON(fieldsJSON),
+    FormTitle:    "Request a Transport Quote",
+    ButtonText:   "Submit Request",
+    ButtonColor:  "#000000",
+}
 
 		c.JSON(http.StatusOK, defaultConfig)
 		return
@@ -49,7 +49,7 @@ func CreateOrUpdateFormConfig(c *gin.Context) {
 		return
 	}
 
-	err := DB.Where(models.FormConfig{AffiliateID: config.AffiliateID}).Assign(config).FirstOrCreate(&config).Error
+err := DB.Where(models.FormConfig{AffiliateID: config.AffiliateID}).Assign(config).FirstOrCreate(&config).Error
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Save failed"})
 		return
