@@ -1,6 +1,7 @@
 package middlewares
 
 import (
+	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -48,47 +49,54 @@ func RequireAdmin() gin.HandlerFunc {
 }
 
 func RequireRole(expectedRole string) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		authHeader := c.GetHeader("Authorization")
-		var tokenString string
+    return func(c *gin.Context) {
+        authHeader := c.GetHeader("Authorization")
+        var tokenString string
 
-		// Check Authorization header or fall back to cookie
-		if strings.HasPrefix(authHeader, "Bearer ") {
-			tokenString = strings.TrimPrefix(authHeader, "Bearer ")
-		} else if cookieToken, err := c.Cookie("token"); err == nil {
-			tokenString = cookieToken
-		}
+        // Check Authorization header or fall back to cookie
+        if strings.HasPrefix(authHeader, "Bearer ") {
+            tokenString = strings.TrimPrefix(authHeader, "Bearer ")
+        } else if cookieToken, err := c.Cookie("token"); err == nil {
+            tokenString = cookieToken
+        }
 
-		if tokenString == "" {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Missing or malformed token"})
-			return
-		}
+        if tokenString == "" {
+            log.Println("Missing or malformed token")
+            c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Missing or malformed token"})
+            return
+        }
 
-		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-			return jwtSecret, nil
-		})
+        // Log the token for debugging
+        log.Printf("Received token: %s", tokenString)
 
-		if err != nil || !token.Valid {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
-			return
-		}
+        token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+            return jwtSecret, nil
+        })
 
-		claims, ok := token.Claims.(jwt.MapClaims)
-		if !ok {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token structure"})
-			return
-		}
+        if err != nil || !token.Valid {
+            log.Printf("Invalid token: %v", err)
+            c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
+            return
+        }
 
-		roleClaim := claims["role"]
-		if roleClaim != expectedRole {
-			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "Access denied"})
-			return
-		}
+        claims, ok := token.Claims.(jwt.MapClaims)
+        if !ok {
+            log.Println("Invalid token structure")
+            c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token structure"})
+            return
+        }
 
-		c.Set("user_id", claims["user_id"])
-		c.Set("role", roleClaim)
-		c.Next()
-	}
+        roleClaim := claims["role"]
+        if roleClaim != expectedRole {
+            log.Printf("Access denied for role: %v", roleClaim)
+            c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "Access denied"})
+            return
+        }
+
+        c.Set("user_id", claims["user_id"])
+        c.Set("role", roleClaim)
+        c.Next()
+    }
 }
 
 

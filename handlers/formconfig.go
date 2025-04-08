@@ -7,34 +7,43 @@ import (
 
 	"github.com/adamn1225/affiliate-whitelabel/models"
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 	"gorm.io/gorm"
 )
+var validate = validator.New()
+
 
 func CreateForm(db *gorm.DB) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		var input models.FormConfig
+    return func(c *gin.Context) {
+        var input models.FormConfig
 
-		if err := c.ShouldBindJSON(&input); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid form data"})
-			return
-		}
+        if err := c.ShouldBindJSON(&input); err != nil {
+            c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid form data"})
+            return
+        }
 
-		// Grab user ID from JWT claims (set by middleware)
-		userID, exists := c.Get("user_id")
-		if !exists {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-			return
-		}
+        // Validate the input
+        if err := validate.Struct(input); err != nil {
+            c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+            return
+        }
 
-		input.UserID = userID.(uint)
+        // Grab user ID from JWT claims (set by middleware)
+        userID, exists := c.Get("user_id")
+        if !exists {
+            c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+            return
+        }
 
-		if err := db.Create(&input).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save form"})
-			return
-		}
+        input.UserID = userID.(uint)
 
-		c.JSON(http.StatusOK, input)
-	}
+        if err := db.Create(&input).Error; err != nil {
+            c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save form"})
+            return
+        }
+
+        c.JSON(http.StatusOK, input)
+    }
 }
 
 func GetVendorFormConfigs(db *gorm.DB) gin.HandlerFunc {

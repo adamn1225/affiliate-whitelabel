@@ -125,11 +125,11 @@ func main() {
     // Iterate over the form templates and create forms
     for _, tpl := range formTemplates {
         form := models.FormConfig{
-            UserID:      vendors[0].ID,
-            Fields:      fieldJSON,
-            FormTitle:   tpl.Title,
-            ButtonText:  tpl.ButtonText,
-            ButtonColor: tpl.ButtonColor,
+    UserID:      vendors[0].ID,
+    Fields:      fieldJSON,
+    FormTitle:   tpl.Title,
+    ButtonText:  tpl.ButtonText,
+    ButtonColor: tpl.ButtonColor,
         }
         if err := db.Create(&form).Error; err != nil {
             log.Fatalf("Error creating form config for vendor[0]: %v", err)

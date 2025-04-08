@@ -13,7 +13,7 @@ type FormField struct {
 }
 
 type FormConfig struct {
-    ID          uint           `gorm:"primaryKey"`
+    ID          uint           `gorm:"primaryKey" json:"id"`
     AffiliateID *string        `gorm:"uniqueIndex" json:"affiliate_id"`
     Fields      datatypes.JSON `json:"fields"`
     FormTitle   string         `json:"form_title"`
