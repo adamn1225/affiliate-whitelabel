@@ -30,3 +30,17 @@ func GetVendorLeads(db *gorm.DB) gin.HandlerFunc {
 		c.JSON(http.StatusOK, gin.H{"leads": leads})
 	}
 }
+
+func GetLeadsByForm(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		formID := c.Param("form_id")
+
+		var leads []models.Lead
+		if err := db.Where("form_id = ?", formID).Find(&leads).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch leads"})
+			return
+		}
+
+		c.JSON(http.StatusOK, leads)
+	}
+}

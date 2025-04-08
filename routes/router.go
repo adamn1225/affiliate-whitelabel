@@ -46,6 +46,6 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB) {
 	r.GET("/api/vendor/leads", handlers.GetVendorLeads(db))
 
 	// Lead submission
+	r.GET("/api/leads/:form_id", middlewares.RequireRole("vendor"), handlers.GetLeadsByForm(db))
 	r.POST("/api/leads", handlers.SubmitLead(db))
-
-}
+	r.GET("/api/leads", middlewares.RequireRole("vendor"), handlers.GetLeads(db))}

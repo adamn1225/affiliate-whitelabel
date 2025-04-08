@@ -12,7 +12,7 @@ import (
 type LeadSubmission struct {
 	FormID      uint                   `json:"form_id" binding:"required"`
 	AffiliateID string                 `json:"affiliate_id"`
-	Data        map[string]interface{} `json:"data" binding:"required"`
+	Data        map[string]any `json:"data" binding:"required"`
 }
 
 func SubmitLead(db *gorm.DB) gin.HandlerFunc {
@@ -63,4 +63,23 @@ func SubmitLead(db *gorm.DB) gin.HandlerFunc {
 
 		c.JSON(http.StatusOK, gin.H{"message": "Lead submitted successfully"})
 	}
+}
+
+func GetLeads(db *gorm.DB) gin.HandlerFunc {
+    return func(c *gin.Context) {
+        formID := c.Query("form_id")
+        if formID == "" {
+            c.JSON(http.StatusBadRequest, gin.H{"error": "form_id is required"})
+            return
+        }
+
+        var leads []models.Lead
+        if err := db.Where("form_id = ?", formID).Order("created_at desc").Find(&leads).Error; err != nil {
+            c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch leads"})
+            return
+        }
+
+        // Return leads as raw array
+        c.JSON(http.StatusOK, leads)
+    }
 }
