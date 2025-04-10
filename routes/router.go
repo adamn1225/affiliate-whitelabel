@@ -42,10 +42,16 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB) {
 
 	r.GET("/api/my-payouts", middlewares.RequireAuth(), handlers.GetMyPayouts(db))
 
+	// Admin
+	r.POST("/api/admin/payouts/trigger", middlewares.RequireRole("admin"), handlers.TriggerPayouts(db))
+	
 	// Vendor
-	r.GET("/api/vendor/leads", handlers.GetVendorLeads(db))
-
 	// Lead submission
+	r.GET("/api/vendor/commissions", middlewares.RequireRole("vendor"), handlers.GetVendorCommission(db))
+	r.PATCH("/api/vendor/commission", middlewares.RequireRole("vendor"), handlers.UpdateVendorCommission(db))
+	r.GET("/api/vendor/wallet", middlewares.RequireRole("vendor"), handlers.GetVendorWallet(db))
+	r.GET("/api/vendor/leads", handlers.GetVendorLeads(db))
 	r.GET("/api/leads/:form_id", middlewares.RequireRole("vendor"), handlers.GetLeadsByForm(db))
 	r.POST("/api/leads", handlers.SubmitLead(db))
 	r.GET("/api/leads", middlewares.RequireRole("vendor"), handlers.GetLeads(db))}
+

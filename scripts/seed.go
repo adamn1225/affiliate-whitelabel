@@ -33,13 +33,17 @@ func main() {
         log.Fatal("Failed to connect to database:", err)
     }
 
-    // Clear existing data
-    db.Exec("DELETE FROM form_configs")
-    db.Exec("DELETE FROM affiliates")
-    db.Exec("DELETE FROM users")
-    db.Exec("DELETE FROM affiliate_links")
-    db.Exec("DELETE FROM leads")
-    db.Exec("DELETE FROM affiliate_payouts")
+db.Exec("DELETE FROM form_configs")
+db.Exec("DELETE FROM affiliates")
+db.Exec("DELETE FROM users")
+db.Exec("DELETE FROM affiliate_links")
+db.Exec("DELETE FROM leads")
+db.Exec("DELETE FROM affiliate_payouts")
+db.Exec("DELETE FROM vendor_commissions")
+db.Exec("DELETE FROM vendor_wallets")
+db.Exec("SELECT setval(pg_get_serial_sequence('users', 'id'), 1, false)")
+db.Exec("SELECT setval(pg_get_serial_sequence('vendor_wallets', 'id'), 1, false)")
+db.Exec("SELECT setval(pg_get_serial_sequence('vendor_commissions', 'id'), 1, false)")
 
     // Seed vendors (users)
     vendors := []*models.User{
@@ -63,11 +67,36 @@ func main() {
         },
     }
 
-    for _, v := range vendors {
-        if err := db.Create(v).Error; err != nil {
-            log.Fatal("Error creating vendor:", err)
-        }
+for _, v := range vendors {
+    if err := db.Create(v).Error; err != nil {
+        log.Fatal("Error creating vendor:", err)
     }
+
+    // Create a wallet for each vendor
+    wallet := models.VendorWallet{
+        VendorID:  v.ID,
+        Balance:   100.0, // Default balance
+        UpdatedAt: time.Now(),
+    }
+    if err := db.Create(&wallet).Error; err != nil {
+        log.Fatal("Error creating vendor wallet:", err)
+    }
+}
+
+// Ensure the VendorID is correctly set
+if vendors[0].ID == 0 {
+    log.Fatal("Vendor ID not set after creation. Check database connection or model configuration.")
+}
+
+// Create a VendorCommission for the first vendor
+if err := db.Create(&models.VendorCommission{
+    VendorID:   vendors[0].ID, // Use the updated ID
+    Commission: 0.15,          // 15% base
+    CreatedAt:  time.Now(),
+}).Error; err != nil {
+    log.Fatal("Error creating vendor commission:", err)
+}
+
 
     // Seed affiliates
     affiliates := []*models.Affiliate{

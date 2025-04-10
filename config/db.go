@@ -60,6 +60,8 @@ func MigrateDB(db *gorm.DB) {
 		&models.AffiliateLink{},
 		&models.AffiliatePayout{},
 		&models.Lead{},
+		&models.VendorWallet{},
+		&models.VendorCommission{},
 	)
 	if err != nil {
 		log.Fatal("Migration failed:", err)

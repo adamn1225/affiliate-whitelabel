@@ -20,19 +20,21 @@ type Affiliate struct {
 
 type AffiliateLink struct {
 	ID           uint    `gorm:"primaryKey"`
-	Slug         string  `gorm:"uniqueIndex;not null"` // e.g. abc123
-	AffiliateID  string  `gorm:"not null"`             // User.Email or UUID
+	Slug         string  `gorm:"uniqueIndex;not null"`
+	AffiliateID  string  `gorm:"not null"`
 	FormConfigID uint    `gorm:"not null"`
 	PayoutAmount float64 `gorm:"not null"`
 	CreatedAt    time.Time
 }
 
 type AffiliatePayout struct {
-	ID          uint    `gorm:"primaryKey"`
-	AffiliateID string  `gorm:"not null"`
-	LeadID      uint    `gorm:"not null"`
-	Amount      float64 `gorm:"not null"`
-	Status      string  `gorm:"default:'pending'"` // pending, paid
-	PaidAt      *time.Time
-	CreatedAt   time.Time
+	ID           uint           `gorm:"primaryKey"`
+	AffiliateID  string         `gorm:"index"`
+	LeadID       uint           `gorm:"index"`
+	Amount       float64        
+	AffiliateCut float64 		`json:"affiliate_cut"`
+	PlatformFee  float64 		`json:"platform_fee"`
+	PaidAt       *time.Time 	`json:"paid_at,omitempty"`
+	Status       string         `gorm:"default:'pending'"`
+	CreatedAt    time.Time
 }
