@@ -32,3 +32,12 @@ type RotatorLink struct {
 	Conditions datatypes.JSON `gorm:"type:jsonb"` // << NEW
 	CreatedAt  time.Time
 }
+
+type RotatorClick struct {
+	ID         uint      `gorm:"primaryKey"`
+	RotatorID  uint      `gorm:"index"`
+	LinkID     uint      `gorm:"index"`
+	IPAddress  string
+	UserAgent  string
+	CreatedAt  time.Time
+}

@@ -18,6 +18,8 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB) {
 	})
 
 	// Existing routes
+	r.GET("/api/public/vendors", handlers.GetAllVendors(db))
+	r.GET("/api/public/vendors/:id", handlers.GetVendorByID(db))
 	r.GET("/api/public/rotators/:slug", handlers.GetRotatorBySlug(db))
 	r.GET("/r/:slug", handlers.RotateLink(db)) 
 	r.POST("/api/signup", handlers.Signup(db))
@@ -38,7 +40,7 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB) {
 
 	r.GET("/api/vendor/formconfigs", middlewares.RequireRole("vendor"), handlers.GetVendorFormConfigs(db))
 	//offer rotator
-	
+	r.PATCH("/api/affiliate/profile", middlewares.RequireRole("affiliate"), handlers.UpdateAffiliateProfile(db))
 	r.GET("/api/affiliate/rotators/:id", middlewares.RequireRole("affiliate"), handlers.GetRotatorByID(db))
 	r.GET("/api/affiliate/rotators", middlewares.RequireRole("affiliate"), handlers.GetMyRotators(db))
 	r.POST("/api/affiliate/rotators", middlewares.RequireRole("affiliate"), handlers.CreateRotator(db))

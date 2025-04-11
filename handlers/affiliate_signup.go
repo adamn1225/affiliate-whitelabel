@@ -77,3 +77,42 @@ func AffiliateSignup(db *gorm.DB) gin.HandlerFunc {
 		})
 	}
 }
+
+func UpdateAffiliateProfile(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		affiliateIDRaw, exists := c.Get("user_id")
+		if !exists {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+			return
+		}
+		affiliateID := affiliateIDRaw.(string)
+
+		var input struct {
+			CompanyName string `json:"company_name"`
+			ContactName string `json:"contact_name"`
+			Phone       string `json:"phone"`
+			Website     string `json:"website"`
+			Industry    string `json:"industry"`
+		}
+
+		if err := c.ShouldBindJSON(&input); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
+			return
+		}
+
+		updates := map[string]any{
+			"company_name": input.CompanyName,
+			"contact_name": input.ContactName,
+			"phone":        input.Phone,
+			"website":      input.Website,
+			"industry":     input.Industry,
+		}
+
+		if err := db.Model(&models.Affiliate{}).Where("id = ?", affiliateID).Updates(updates).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update profile"})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{"message": "Profile updated"})
+	}
+}

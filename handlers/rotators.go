@@ -39,24 +39,58 @@ func RotateLink(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
+		// Pick link first
 		var selected models.RotatorLink
-
 		switch rotator.Strategy {
 		case "random":
 			rand.Seed(time.Now().UnixNano())
 			selected = links[rand.Intn(len(links))]
-
-		// Later we can add "weighted" logic here
-
 		default:
-			selected = links[0] // fallback
+			selected = links[0]
 		}
 
 		// Increment click count
 		db.Model(&selected).UpdateColumn("clicks", gorm.Expr("clicks + ?", 1))
 
+		// Log the click event
+		click := models.RotatorClick{
+			RotatorID: rotator.ID,
+			LinkID:    selected.ID,
+			IPAddress: c.ClientIP(),
+			UserAgent: c.GetHeader("User-Agent"),
+			CreatedAt: time.Now(),
+		}
+		db.Create(&click)
+
+		var recentClick models.RotatorClick
+	if err := db.
+    	Where("rotator_id = ? AND ip_address = ?", rotator.ID, c.ClientIP()).
+    	Order("created_at desc").
+    	First(&recentClick).Error; err == nil {
+    
+    // Already clicked recently — skip incrementing or recording
+    if time.Since(recentClick.CreatedAt) < 10*time.Second {
+        log.Printf("Rate-limited click for rotator %s from IP %s", slug, c.ClientIP())
+        c.JSON(http.StatusTooManyRequests, gin.H{"error": "Rate limited"})
+        return
+    }
+}
+
 		log.Printf("Redirecting rotator slug %s to %s", slug, selected.URL)
 		c.Redirect(http.StatusFound, selected.URL)
+	}
+}
+
+
+func GetRotatorClicks(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id := c.Param("id")
+		var clicks []models.RotatorClick
+		if err := db.Where("rotator_id = ?", id).Order("created_at desc").Find(&clicks).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch clicks"})
+			return
+		}
+		c.JSON(http.StatusOK, clicks)
 	}
 }
 
@@ -94,6 +128,8 @@ func CreateRotator(db *gorm.DB) gin.HandlerFunc {
 		c.JSON(http.StatusOK, rotator)
 	}
 }
+
+
 
 func GetMyRotators(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -136,6 +172,7 @@ func AddRotatorLink(db *gorm.DB) gin.HandlerFunc {
 		}
 
 		c.JSON(http.StatusOK, link)
+
 	}
 }
 

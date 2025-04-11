@@ -7,18 +7,20 @@ import (
 )
 
 type User struct {
-	gorm.Model
-	Email        string `gorm:"uniqueIndex;not null"`
-	PasswordHash string `gorm:"not null"`
-	CompanyName  string
-	Industry     string
-	Address      string
+    gorm.Model
+    Email        string `gorm:"uniqueIndex;not null"`
+    PasswordHash string `gorm:"not null"`
+    CompanyName  string
+    Industry     string
+    Address      string
     Website      string
     Phone        string
     FirstName    string
+    Description  string `json:"description"`
     LastName     string
-	Role         string `gorm:"default:vendor"`
-	CreatedAt    time.Time
+    Role         string `gorm:"default:vendor"`
+    Public       bool   `gorm:"default:true"` // New field for public/private setting
+    CreatedAt    time.Time
 }
 
 type VendorWallet struct {
@@ -39,6 +41,16 @@ type VendorCommission struct {
     AffiliateID    *string `gorm:"index;default:null"`
     Commission     float64
     CreatedAt      time.Time
+}
+
+type PublicVendorListing struct {
+    ID           uint    `json:"id"`
+    CompanyName  string  `json:"company_name"`
+    Industry     string  `json:"industry"`
+    Website      string  `json:"website"`
+    Description  string  `json:"description"`
+    Commission   float64 `json:"commission"`
+    Public       bool    `json:"public"` // New field to control visibility
 }
 
 func GetCommissionRate(db *gorm.DB, vendorID uint, affiliateID string) float64 {

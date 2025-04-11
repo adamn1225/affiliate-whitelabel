@@ -9,6 +9,7 @@ type Affiliate struct {
 	Role           string    `json:"role" gorm:"default:'affiliate'"`
 	PasswordHash   string    `gorm:"not null" json:"-"`
 	CompanyName    string    `json:"company_name"`
+	Industry 	   string    `json:"industry"`
 	ContactName    string    `json:"contact_name"`
 	Email          string    `json:"email"`
 	Phone          string    `json:"phone"`

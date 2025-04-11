@@ -67,32 +67,33 @@ db.Exec("SELECT setval(pg_get_serial_sequence('vendor_commissions', 'id'), 1, fa
         },
     }
 
-for _, v := range vendors {
-    if err := db.Create(v).Error; err != nil {
+for i := range vendors {
+    if err := db.Create(&vendors[i]).Error; err != nil {
         log.Fatal("Error creating vendor:", err)
     }
 
     wallet := models.VendorWallet{
-        VendorID:  v.ID,
+        VendorID:  vendors[i].ID,
         Balance:   100.0,
         UpdatedAt: time.Now(),
     }
     if err := db.Create(&wallet).Error; err != nil {
         log.Fatal("Error creating vendor wallet:", err)
     }
-}
 
-if vendors[0].ID == 0 {
-    log.Fatal("Vendor ID not set after creation. Check database connection or model configuration.")
-}
+    // Now also seed a commission
+    commission := 0.15
+    if i == 1 {
+        commission = 0.10
+    }
 
-// Create a VendorCommission for the first vendor
-if err := db.Create(&models.VendorCommission{
-    VendorID:   vendors[0].ID, 
-    Commission: 0.15,   
-    CreatedAt:  time.Now(),
-}).Error; err != nil {
-    log.Fatal("Error creating vendor commission:", err)
+    if err := db.Create(&models.VendorCommission{
+        VendorID:   vendors[i].ID,
+        Commission: commission,
+        CreatedAt:  time.Now(),
+    }).Error; err != nil {
+        log.Fatalf("Error creating commission for vendor %d: %v", i, err)
+    }
 }
 
 
