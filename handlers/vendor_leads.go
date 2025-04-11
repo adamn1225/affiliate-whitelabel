@@ -73,4 +73,14 @@ func GetMyLeads(db *gorm.DB) gin.HandlerFunc {
     }
 }
 
+func GetRecentLeadsForZapier(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var leads []models.Lead
+		if err := db.Order("created_at desc").Limit(10).Find(&leads).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch leads"})
+			return
+		}
+		c.JSON(http.StatusOK, leads)
+	}
+}
 

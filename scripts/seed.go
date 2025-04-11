@@ -72,10 +72,9 @@ for _, v := range vendors {
         log.Fatal("Error creating vendor:", err)
     }
 
-    // Create a wallet for each vendor
     wallet := models.VendorWallet{
         VendorID:  v.ID,
-        Balance:   100.0, // Default balance
+        Balance:   100.0,
         UpdatedAt: time.Now(),
     }
     if err := db.Create(&wallet).Error; err != nil {
@@ -83,15 +82,14 @@ for _, v := range vendors {
     }
 }
 
-// Ensure the VendorID is correctly set
 if vendors[0].ID == 0 {
     log.Fatal("Vendor ID not set after creation. Check database connection or model configuration.")
 }
 
 // Create a VendorCommission for the first vendor
 if err := db.Create(&models.VendorCommission{
-    VendorID:   vendors[0].ID, // Use the updated ID
-    Commission: 0.15,          // 15% base
+    VendorID:   vendors[0].ID, 
+    Commission: 0.15,   
     CreatedAt:  time.Now(),
 }).Error; err != nil {
     log.Fatal("Error creating vendor commission:", err)
@@ -130,7 +128,75 @@ if err := db.Create(&models.VendorCommission{
         if err := db.Create(a).Error; err != nil {
             log.Fatal("Error creating affiliate:", err)
         }
+
+        wallet := models.AffiliateWallet{
+    AffiliateID: a.ID,
+    Balance:     42.00,
+    UpdatedAt:   time.Now(),
+}
+if err := db.Create(&wallet).Error; err != nil {
+    log.Fatalf("Error creating affiliate wallet for %s: %v", a.Email, err)
+}
+
+commission := models.AffiliateCommission{
+    AffiliateID: a.ID,
+    Commission:  a.CommissionRate,
+    CreatedAt:   time.Now(),
+}
+if err := db.Create(&commission).Error; err != nil {
+    log.Fatalf("Error creating affiliate commission for %s: %v", a.Email, err)
+}
     }
+
+     for _, affiliate := range affiliates {
+    rotator := models.OfferRotator{
+        AffiliateID: affiliate.ID,
+        Name:        "My First Rotator",
+        Slug:        uuid.New().String()[0:8],
+        Strategy:    "random", // or "weighted" later
+        CreatedAt:   time.Now(),
+    }
+
+    if err := db.Create(&rotator).Error; err != nil {
+        log.Fatalf("Error creating rotator for affiliate %s: %v", affiliate.Email, err)
+    }
+
+    // Create wallet for affiliate affiliate1@example.com
+if err := db.Create(&models.AffiliateWallet{
+    AffiliateID: "7cc60aa5-d01c-4e87-949b-7ee9936bd8e7",
+    Balance:     50.0,
+    UpdatedAt:   time.Now(),
+}).Error; err != nil {
+    log.Fatalf("Error creating wallet for affiliate %s: %v", "affiliate1@example.com", err)
+}
+
+// Create commission record for affiliate affiliate1@example.com
+if err := db.Create(&models.AffiliateCommission{
+    AffiliateID: "7cc60aa5-d01c-4e87-949b-7ee9936bd8e7",
+    Commission:  0.10,
+    CreatedAt:   time.Now(),
+}).Error; err != nil {
+    log.Fatalf("Error creating commission for affiliate %s: %v", "affiliate1@example.com", err)
+}
+
+// Create wallet for affiliate affiliate2@example.com
+if err := db.Create(&models.AffiliateWallet{
+    AffiliateID: "c90fb43e-95ac-4a01-b42b-d684832ac38c",
+    Balance:     50.0,
+    UpdatedAt:   time.Now(),
+}).Error; err != nil {
+    log.Fatalf("Error creating wallet for affiliate %s: %v", "affiliate2@example.com", err)
+}
+
+// Create commission record for affiliate affiliate2@example.com
+if err := db.Create(&models.AffiliateCommission{
+    AffiliateID: "c90fb43e-95ac-4a01-b42b-d684832ac38c",
+    Commission:  0.12,
+    CreatedAt:   time.Now(),
+}).Error; err != nil {
+    log.Fatalf("Error creating commission for affiliate %s: %v", "affiliate2@example.com", err)
+}
+
 
     // Default form fields
     defaultFields := []models.FormField{
@@ -210,6 +276,34 @@ if err := db.Create(&models.VendorCommission{
                 }
             }
         }
+
+        // Seed rotators for each affiliate
+   
+
+
+    // Add sample links
+    links := []models.RotatorLink{
+        {
+            RotatorID: rotator.ID,
+            URL:       "https://example.com/offer1",
+            Weight:    1,
+            CreatedAt: time.Now(),
+        },
+        {
+            RotatorID: rotator.ID,
+            URL:       "https://example.com/offer2",
+            Weight:    2,
+            CreatedAt: time.Now(),
+        },
+    }
+
+    for _, link := range links {
+        if err := db.Create(&link).Error; err != nil {
+            log.Fatalf("Error creating link for rotator %d: %v", rotator.ID, err)
+        }
+    }
+}
+
     }
 
     log.Println("✅ Seeding complete.")

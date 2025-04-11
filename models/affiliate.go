@@ -38,3 +38,17 @@ type AffiliatePayout struct {
 	Status       string         `gorm:"default:'pending'"`
 	CreatedAt    time.Time
 }
+
+type AffiliateWallet struct {
+	ID         uint      `gorm:"primaryKey"`
+	AffiliateID string    `gorm:"index;not null"`
+	Balance    float64   `gorm:"default:0"`
+	UpdatedAt  time.Time
+}
+
+type AffiliateCommission struct {
+	ID          uint      `gorm:"primaryKey"`
+	AffiliateID string    `gorm:"index;not null"`
+	Commission  float64   `gorm:"default:0.1"` // default 10%
+	CreatedAt   time.Time
+}

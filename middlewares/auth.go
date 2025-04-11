@@ -154,4 +154,24 @@ func RequireAuth() gin.HandlerFunc {
 }
 
 
+// func RequireAnyRole(allowedRoles ...string) gin.HandlerFunc {
+// 	return func(c *gin.Context) {
+// 		tokenString := extractToken(c) // your logic here
+// 		claims := parseClaims(tokenString)
+
+// 		userRole := claims["role"].(string)
+// 		for _, role := range allowedRoles {
+// 			if userRole == role {
+// 				c.Set("user_id", claims["user_id"])
+// 				c.Set("role", userRole)
+// 				c.Next()
+// 				return
+// 			}
+// 		}
+
+// 		c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "Access denied"})
+// 	}
+// }
+
+
 
